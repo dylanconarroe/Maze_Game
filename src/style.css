@@ -67,3 +67,14 @@ button {
 button:hover {
   background: #ddd;
 }
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.path {
+  background: #2196f3;
+  color: white;
+}

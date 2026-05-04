@@ -14,6 +14,7 @@ let playerPosition = {
 };
 
 let gameWon = false;
+let solutionPath: { row: number; col: number }[] = [];
 
 const appElement = document.querySelector<HTMLDivElement>('#app');
 
@@ -28,8 +29,11 @@ function renderMaze() {
     <h1>Maze Escape AI</h1>
     <p>Use WASD or arrow keys to move. Reach the door to escape.</p>
     ${gameWon ? '<h2 class="win-message">You escaped the maze!</h2>' : ''}
-    <button id="reset-button">Reset Game</button>
-    <div class="maze">
+    <div class="button-row">
+  <button id="reset-button">Reset Game</button>
+  <button id="solve-button">Show Shortest Path</button>
+</div>
+<div class="maze">
       ${maze
         .map(
           (row, rowIndex) => `
@@ -41,10 +45,18 @@ function renderMaze() {
                     playerPosition.col === colIndex;
 
                   if (isPlayer) {
-                    return `<div class="cell player">🙂</div>`;
-                  }
+  return `<div class="cell player">🙂</div>`;
+}
 
-                  return `<div class="cell ${getCellClass(cell)}">${getCellText(cell)}</div>`;
+const isPath = solutionPath.some(
+  position => position.row === rowIndex && position.col === colIndex
+);
+
+if (isPath && cell !== 'E') {
+  return `<div class="cell path">•</div>`;
+}
+
+return `<div class="cell ${getCellClass(cell)}">${getCellText(cell)}</div>`;
                 })
                 .join('')}
             </div>
@@ -57,6 +69,12 @@ function renderMaze() {
 
 if (resetButton) {
   resetButton.addEventListener('click', resetGame);
+}
+
+const solveButton = document.querySelector<HTMLButtonElement>('#solve-button');
+
+if (solveButton) {
+  solveButton.addEventListener('click', showShortestPath);
 }
 }
 
@@ -84,11 +102,13 @@ function movePlayer(rowChange: number, colChange: number) {
   }
 
   playerPosition = {
-    row: nextRow,
-    col: nextCol,
-  };
+  row: nextRow,
+  col: nextCol,
+};
 
-  if (maze[nextRow][nextCol] === 'E') {
+solutionPath = [];
+
+if (maze[nextRow][nextCol] === 'E') {
     gameWon = true;
   }
 
@@ -101,6 +121,7 @@ function resetGame() {
   };
 
   gameWon = false;
+  solutionPath = [];
   renderMaze();
 }
 
@@ -114,6 +135,85 @@ function canMoveTo(row: number, col: number): boolean {
   }
 
   return maze[row][col] !== '#';
+}
+
+function findShortestPath(
+  start: { row: number; col: number },
+  end: { row: number; col: number }
+): { row: number; col: number }[] {
+  const queue: { row: number; col: number; path: { row: number; col: number }[] }[] = [
+    {
+      row: start.row,
+      col: start.col,
+      path: [start],
+    },
+  ];
+
+  const visited = new Set<string>();
+  visited.add(`${start.row},${start.col}`);
+
+  const directions = [
+    { row: -1, col: 0 },
+    { row: 1, col: 0 },
+    { row: 0, col: -1 },
+    { row: 0, col: 1 },
+  ];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current) {
+      break;
+    }
+
+    if (current.row === end.row && current.col === end.col) {
+      return current.path;
+    }
+
+    for (const direction of directions) {
+      const nextRow = current.row + direction.row;
+      const nextCol = current.col + direction.col;
+      const key = `${nextRow},${nextCol}`;
+
+      if (visited.has(key)) {
+        continue;
+      }
+
+      if (!canMoveTo(nextRow, nextCol)) {
+        continue;
+      }
+
+      visited.add(key);
+
+      queue.push({
+        row: nextRow,
+        col: nextCol,
+        path: [...current.path, { row: nextRow, col: nextCol }],
+      });
+    }
+  }
+
+  return [];
+}
+
+function showShortestPath() {
+  const exitPosition = findExitPosition();
+
+  solutionPath = findShortestPath(playerPosition, exitPosition);
+
+  renderMaze();
+}
+
+function findExitPosition(): { row: number; col: number } {
+  for (let row = 0; row < maze.length; row++) {
+    for (let col = 0; col < maze[row].length; col++) {
+      if (maze[row][col] === 'E') {
+        return { row, col };
+      }
+    }
+  }
+
+  throw new Error('Exit not found');
 }
 
 document.addEventListener('keydown', event => {
