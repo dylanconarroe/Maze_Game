@@ -14,11 +14,11 @@ type LevelConfig = {
 };
 
 const levels: LevelConfig[] = [
-  { rows: 7, cols: 9, wallChance: 0.18 },
-  { rows: 9, cols: 11, wallChance: 0.22 },
-  { rows: 11, cols: 13, wallChance: 0.25 },
-  { rows: 13, cols: 15, wallChance: 0.28 },
-  { rows: 15, cols: 17, wallChance: 0.31 },
+  { rows: 7, cols: 9, wallChance: 0 },
+  { rows: 11, cols: 13, wallChance: 0 },
+  { rows: 15, cols: 17, wallChance: 0 },
+  { rows: 19, cols: 21, wallChance: 0 },
+  { rows: 23, cols: 25, wallChance: 0 },
 ];
 
 let currentLevelIndex = 0;

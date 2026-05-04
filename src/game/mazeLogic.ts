@@ -90,51 +90,154 @@ export function findShortestPath(
 export function generateRandomMaze(
   rows: number,
   cols: number,
-  wallChance = 0.25
+  extraWallChance = 0
 ): string[][] {
   if (rows < 5 || cols < 5) {
     throw new Error('Maze must be at least 5 rows by 5 columns');
   }
 
-  let attempts = 0;
-  const maxAttempts = 100;
+  const adjustedRows = rows % 2 === 0 ? rows + 1 : rows;
+  const adjustedCols = cols % 2 === 0 ? cols + 1 : cols;
 
-  while (attempts < maxAttempts) {
-    const maze: string[][] = [];
+  const maze: string[][] = Array.from({ length: adjustedRows }, () =>
+    Array.from({ length: adjustedCols }, () => '#')
+  );
 
-    for (let row = 0; row < rows; row++) {
-      const currentRow: string[] = [];
+  const directions = [
+    { row: -2, col: 0 },
+    { row: 2, col: 0 },
+    { row: 0, col: -2 },
+    { row: 0, col: 2 },
+  ];
 
-      for (let col = 0; col < cols; col++) {
-        const isBorder =
-          row === 0 || row === rows - 1 || col === 0 || col === cols - 1;
+  function shuffle<T>(items: T[]): T[] {
+    const copy = [...items];
 
-        if (isBorder) {
-          currentRow.push('#');
-        } else {
-          const isWall = Math.random() < wallChance;
-          currentRow.push(isWall ? '#' : ' ');
-        }
-      }
-
-      maze.push(currentRow);
+    for (let i = copy.length - 1; i > 0; i--) {
+      const randomIndex = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[randomIndex]] = [copy[randomIndex], copy[i]];
     }
 
-    maze[1][1] = ' ';
-    maze[rows - 2][cols - 2] = 'E';
-
-    const path = findShortestPath(
-      maze,
-      { row: 1, col: 1 },
-      { row: rows - 2, col: cols - 2 }
-    );
-
-    if (path.length > 0) {
-      return maze;
-    }
-
-    attempts++;
+    return copy;
   }
 
-  throw new Error('Failed to generate a solvable maze');
+  function carvePath(row: number, col: number) {
+    maze[row][col] = ' ';
+
+    for (const direction of shuffle(directions)) {
+      const nextRow = row + direction.row;
+      const nextCol = col + direction.col;
+
+      const isInsideMaze =
+        nextRow > 0 &&
+        nextRow < adjustedRows - 1 &&
+        nextCol > 0 &&
+        nextCol < adjustedCols - 1;
+
+      if (!isInsideMaze) {
+        continue;
+      }
+
+      if (maze[nextRow][nextCol] === '#') {
+        const wallRow = row + direction.row / 2;
+        const wallCol = col + direction.col / 2;
+
+        maze[wallRow][wallCol] = ' ';
+        carvePath(nextRow, nextCol);
+      }
+    }
+  }
+
+  carvePath(1, 1);
+
+  const exitPosition = findFarthestDeadEnd(maze, { row: 1, col: 1 });
+
+  maze[1][1] = ' ';
+  maze[exitPosition.row][exitPosition.col] = 'E';
+
+  return maze;
+}
+
+function findFarthestDeadEnd(
+  maze: string[][],
+  start: Position
+): Position {
+  const queue: { position: Position; distance: number }[] = [
+    { position: start, distance: 0 },
+  ];
+
+  const visited = new Set<string>();
+  visited.add(`${start.row},${start.col}`);
+
+  let farthestDeadEnd = start;
+  let farthestDistance = 0;
+
+  const directions = [
+    { row: -1, col: 0 },
+    { row: 1, col: 0 },
+    { row: 0, col: -1 },
+    { row: 0, col: 1 },
+  ];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current) {
+      break;
+    }
+
+    const { position, distance } = current;
+
+    const isStart =
+      position.row === start.row && position.col === start.col;
+
+    if (!isStart && isDeadEnd(maze, position) && distance > farthestDistance) {
+      farthestDeadEnd = position;
+      farthestDistance = distance;
+    }
+
+    for (const direction of directions) {
+      const next = {
+        row: position.row + direction.row,
+        col: position.col + direction.col,
+      };
+
+      const key = `${next.row},${next.col}`;
+
+      if (visited.has(key)) {
+        continue;
+      }
+
+      if (!canMoveTo(maze, next.row, next.col)) {
+        continue;
+      }
+
+      visited.add(key);
+      queue.push({ position: next, distance: distance + 1 });
+    }
+  }
+
+  return farthestDeadEnd;
+}
+
+function isDeadEnd(maze: string[][], position: Position): boolean {
+  const directions = [
+    { row: -1, col: 0 },
+    { row: 1, col: 0 },
+    { row: 0, col: -1 },
+    { row: 0, col: 1 },
+  ];
+
+  let openNeighborCount = 0;
+
+  for (const direction of directions) {
+    const neighborRow = position.row + direction.row;
+    const neighborCol = position.col + direction.col;
+
+    if (canMoveTo(maze, neighborRow, neighborCol)) {
+      openNeighborCount++;
+    }
+  }
+
+  return openNeighborCount === 1;
 }
