@@ -87,7 +87,11 @@ export function findShortestPath(
   return [];
 }
 
-export function generateRandomMaze(rows: number, cols: number): string[][] {
+export function generateRandomMaze(
+  rows: number,
+  cols: number,
+  wallChance = 0.25
+): string[][] {
   if (rows < 5 || cols < 5) {
     throw new Error('Maze must be at least 5 rows by 5 columns');
   }
@@ -108,7 +112,7 @@ export function generateRandomMaze(rows: number, cols: number): string[][] {
         if (isBorder) {
           currentRow.push('#');
         } else {
-          const isWall = Math.random() < 0.25;
+          const isWall = Math.random() < wallChance;
           currentRow.push(isWall ? '#' : ' ');
         }
       }

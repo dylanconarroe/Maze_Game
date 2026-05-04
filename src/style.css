@@ -23,8 +23,8 @@ body {
 }
 
 .cell {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border: 1px solid #333;
   display: flex;
   align-items: center;
@@ -77,4 +77,13 @@ button:hover {
 .path {
   background: #2196f3;
   color: white;
+}
+
+.level-info {
+  margin-top: -5px;
+  color: #d0d0d0;
+}
+
+h2 {
+  margin-bottom: 5px;
 }

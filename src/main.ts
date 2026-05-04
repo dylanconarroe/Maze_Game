@@ -7,7 +7,23 @@ import {
   type Position,
 } from './game/mazeLogic';
 
-let maze = generateRandomMaze(9, 11);
+type LevelConfig = {
+  rows: number;
+  cols: number;
+  wallChance: number;
+};
+
+const levels: LevelConfig[] = [
+  { rows: 7, cols: 9, wallChance: 0.18 },
+  { rows: 9, cols: 11, wallChance: 0.22 },
+  { rows: 11, cols: 13, wallChance: 0.25 },
+  { rows: 13, cols: 15, wallChance: 0.28 },
+  { rows: 15, cols: 17, wallChance: 0.31 },
+];
+
+let currentLevelIndex = 0;
+
+let maze = generateMazeForCurrentLevel();
 
 let playerPosition = {
   row: 1,
@@ -25,15 +41,32 @@ if (!appElement) {
 
 const app = appElement;
 
+function generateMazeForCurrentLevel(): string[][] {
+  const level = levels[currentLevelIndex];
+
+  return generateRandomMaze(level.rows, level.cols, level.wallChance);
+}
+
 function renderMaze() {
   app.innerHTML = `
-    <h1>Maze Escape AI</h1>
+    <h1>Maze Escape</h1>
+    <h2>Level ${currentLevelIndex + 1} of ${levels.length}</h2>
     <p>Use WASD or arrow keys to move. Reach the door to escape.</p>
+<p class="level-info">
+  Maze size: ${levels[currentLevelIndex].rows} x ${levels[currentLevelIndex].cols}
+</p>
     ${gameWon ? '<h2 class="win-message">You escaped the maze!</h2>' : ''}
     <div class="button-row">
-  <button id="reset-button">Reset Game</button>
+  <button id="reset-button">Reset Level</button>
   <button id="solve-button">Show Shortest Path</button>
-  <button id="new-maze-button">Generate New Maze</button>
+  <button id="new-maze-button">New Maze</button>
+  ${
+    gameWon
+      ? `<button id="next-level-button">
+          ${currentLevelIndex === levels.length - 1 ? 'Restart Game' : 'Next Level'}
+        </button>`
+      : ''
+  }
 </div>
 <div class="maze">
       ${maze
@@ -83,6 +116,13 @@ const newMazeButton = document.querySelector<HTMLButtonElement>('#new-maze-butto
 
 if (newMazeButton) {
   newMazeButton.addEventListener('click', generateNewMaze);
+}
+
+const nextLevelButton =
+  document.querySelector<HTMLButtonElement>('#next-level-button');
+
+if (nextLevelButton) {
+  nextLevelButton.addEventListener('click', goToNextLevel);
 }
 }
 
@@ -142,7 +182,27 @@ function showShortestPath() {
 }
 
 function generateNewMaze() {
-  maze = generateRandomMaze(9, 11);
+  maze = generateMazeForCurrentLevel();
+
+  playerPosition = {
+    row: 1,
+    col: 1,
+  };
+
+  gameWon = false;
+  solutionPath = [];
+
+  renderMaze();
+}
+
+function goToNextLevel() {
+  if (currentLevelIndex === levels.length - 1) {
+    currentLevelIndex = 0;
+  } else {
+    currentLevelIndex++;
+  }
+
+  maze = generateMazeForCurrentLevel();
 
   playerPosition = {
     row: 1,
