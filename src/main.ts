@@ -60,6 +60,9 @@ function renderMaze() {
   <button id="reset-button">Reset Level</button>
   <button id="solve-button">Show Shortest Path</button>
   <button id="new-maze-button">New Maze</button>
+  <button id="skip-level-button">
+    ${currentLevelIndex === levels.length - 1 ? 'Restart Game' : 'Skip Level'}
+  </button>
   ${
     gameWon
       ? `<button id="next-level-button">
@@ -116,6 +119,13 @@ const newMazeButton = document.querySelector<HTMLButtonElement>('#new-maze-butto
 
 if (newMazeButton) {
   newMazeButton.addEventListener('click', generateNewMaze);
+}
+
+const skipLevelButton =
+  document.querySelector<HTMLButtonElement>('#skip-level-button');
+
+if (skipLevelButton) {
+  skipLevelButton.addEventListener('click', goToNextLevel);
 }
 
 const nextLevelButton =

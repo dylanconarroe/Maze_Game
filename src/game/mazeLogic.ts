@@ -169,8 +169,8 @@ function findFarthestDeadEnd(
   const visited = new Set<string>();
   visited.add(`${start.row},${start.col}`);
 
-  let farthestDeadEnd = start;
-  let farthestDistance = 0;
+  let bestExit = start;
+  let bestScore = -1;
 
   const directions = [
     { row: -1, col: 0 },
@@ -191,9 +191,15 @@ function findFarthestDeadEnd(
     const isStart =
       position.row === start.row && position.col === start.col;
 
-    if (!isStart && isDeadEnd(maze, position) && distance > farthestDistance) {
-      farthestDeadEnd = position;
-      farthestDistance = distance;
+    if (!isStart && isDeadEnd(maze, position)) {
+      const nearbyDeadEnds = countNearbyDeadEnds(maze, position, 6);
+
+      const score = distance + nearbyDeadEnds * 12;
+
+      if (score > bestScore) {
+        bestExit = position;
+        bestScore = score;
+      }
     }
 
     for (const direction of directions) {
@@ -217,7 +223,7 @@ function findFarthestDeadEnd(
     }
   }
 
-  return farthestDeadEnd;
+  return bestExit;
 }
 
 function isDeadEnd(maze: string[][], position: Position): boolean {
@@ -240,4 +246,39 @@ function isDeadEnd(maze: string[][], position: Position): boolean {
   }
 
   return openNeighborCount === 1;
+}
+
+function countNearbyDeadEnds(
+  maze: string[][],
+  position: Position,
+  radius: number
+): number {
+  let count = 0;
+
+  for (let row = 1; row < maze.length - 1; row++) {
+    for (let col = 1; col < maze[row].length - 1; col++) {
+      const currentPosition = { row, col };
+
+      if (
+        currentPosition.row === position.row &&
+        currentPosition.col === position.col
+      ) {
+        continue;
+      }
+
+      if (!isDeadEnd(maze, currentPosition)) {
+        continue;
+      }
+
+      const distance =
+        Math.abs(position.row - currentPosition.row) +
+        Math.abs(position.col - currentPosition.col);
+
+      if (distance <= radius) {
+        count++;
+      }
+    }
+  }
+
+  return count;
 }
