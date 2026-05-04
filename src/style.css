@@ -52,3 +52,18 @@ body {
   color: #90ee90;
   margin-top: 10px;
 }
+
+button {
+  margin-top: 10px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e1e2f;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ddd;
+}

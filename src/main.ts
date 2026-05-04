@@ -28,6 +28,7 @@ function renderMaze() {
     <h1>Maze Escape AI</h1>
     <p>Use WASD or arrow keys to move. Reach the door to escape.</p>
     ${gameWon ? '<h2 class="win-message">You escaped the maze!</h2>' : ''}
+    <button id="reset-button">Reset Game</button>
     <div class="maze">
       ${maze
         .map(
@@ -52,6 +53,11 @@ function renderMaze() {
         .join('')}
     </div>
   `;
+  const resetButton = document.querySelector<HTMLButtonElement>('#reset-button');
+
+if (resetButton) {
+  resetButton.addEventListener('click', resetGame);
+}
 }
 
 function getCellClass(cell: string): string {
@@ -86,6 +92,15 @@ function movePlayer(rowChange: number, colChange: number) {
     gameWon = true;
   }
 
+  renderMaze();
+}
+function resetGame() {
+  playerPosition = {
+    row: 1,
+    col: 1,
+  };
+
+  gameWon = false;
   renderMaze();
 }
 
