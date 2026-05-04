@@ -3,16 +3,11 @@ import {
   canMoveTo,
   findExitPosition,
   findShortestPath,
+  generateRandomMaze,
   type Position,
 } from './game/mazeLogic';
 
-const maze = [
-  ['#', '#', '#', '#', '#', '#', '#'],
-  ['#', ' ', ' ', ' ', ' ', 'E', '#'],
-  ['#', ' ', '#', '#', ' ', ' ', '#'],
-  ['#', ' ', ' ', '#', ' ', ' ', '#'],
-  ['#', '#', '#', '#', '#', '#', '#'],
-];
+let maze = generateRandomMaze(9, 11);
 
 let playerPosition = {
   row: 1,
@@ -38,6 +33,7 @@ function renderMaze() {
     <div class="button-row">
   <button id="reset-button">Reset Game</button>
   <button id="solve-button">Show Shortest Path</button>
+  <button id="new-maze-button">Generate New Maze</button>
 </div>
 <div class="maze">
       ${maze
@@ -81,6 +77,12 @@ const solveButton = document.querySelector<HTMLButtonElement>('#solve-button');
 
 if (solveButton) {
   solveButton.addEventListener('click', showShortestPath);
+}
+
+const newMazeButton = document.querySelector<HTMLButtonElement>('#new-maze-button');
+
+if (newMazeButton) {
+  newMazeButton.addEventListener('click', generateNewMaze);
 }
 }
 
@@ -135,6 +137,20 @@ function showShortestPath() {
   const exitPosition = findExitPosition(maze);
 
   solutionPath = findShortestPath(maze, playerPosition, exitPosition);
+
+  renderMaze();
+}
+
+function generateNewMaze() {
+  maze = generateRandomMaze(9, 11);
+
+  playerPosition = {
+    row: 1,
+    col: 1,
+  };
+
+  gameWon = false;
+  solutionPath = [];
 
   renderMaze();
 }

@@ -86,3 +86,51 @@ export function findShortestPath(
 
   return [];
 }
+
+export function generateRandomMaze(rows: number, cols: number): string[][] {
+  if (rows < 5 || cols < 5) {
+    throw new Error('Maze must be at least 5 rows by 5 columns');
+  }
+
+  let attempts = 0;
+  const maxAttempts = 100;
+
+  while (attempts < maxAttempts) {
+    const maze: string[][] = [];
+
+    for (let row = 0; row < rows; row++) {
+      const currentRow: string[] = [];
+
+      for (let col = 0; col < cols; col++) {
+        const isBorder =
+          row === 0 || row === rows - 1 || col === 0 || col === cols - 1;
+
+        if (isBorder) {
+          currentRow.push('#');
+        } else {
+          const isWall = Math.random() < 0.25;
+          currentRow.push(isWall ? '#' : ' ');
+        }
+      }
+
+      maze.push(currentRow);
+    }
+
+    maze[1][1] = ' ';
+    maze[rows - 2][cols - 2] = 'E';
+
+    const path = findShortestPath(
+      maze,
+      { row: 1, col: 1 },
+      { row: rows - 2, col: cols - 2 }
+    );
+
+    if (path.length > 0) {
+      return maze;
+    }
+
+    attempts++;
+  }
+
+  throw new Error('Failed to generate a solvable maze');
+}
