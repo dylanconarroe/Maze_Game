@@ -1,0 +1,49 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #1e1e2f;
+  color: white;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+#app {
+  text-align: center;
+}
+
+.maze {
+  display: inline-block;
+  border: 4px solid white;
+  margin-top: 20px;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.wall {
+  background: #444;
+}
+
+.empty {
+  background: #f2f2f2;
+}
+
+.player {
+  background: #4caf50;
+}
+
+.exit {
+  background: #ff9800;
+}
