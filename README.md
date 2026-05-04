@@ -18,6 +18,11 @@ A TypeScript maze game where the player controls a mouse trying to reach the che
 - GitHub Actions
 - HTML/CSS
 
+## Demo
+
+![Maze Escape AI demo](docs/images/game-demo.gif)
+
+
 ## How to Run Locally
 ```bash
 npm install
