@@ -1,4 +1,10 @@
 import './style.css';
+import {
+  canMoveTo,
+  findExitPosition,
+  findShortestPath,
+  type Position,
+} from './game/mazeLogic';
 
 const maze = [
   ['#', '#', '#', '#', '#', '#', '#'],
@@ -14,7 +20,7 @@ let playerPosition = {
 };
 
 let gameWon = false;
-let solutionPath: { row: number; col: number }[] = [];
+let solutionPath: Position[] = [];
 
 const appElement = document.querySelector<HTMLDivElement>('#app');
 
@@ -97,7 +103,7 @@ function movePlayer(rowChange: number, colChange: number) {
   const nextRow = playerPosition.row + rowChange;
   const nextCol = playerPosition.col + colChange;
 
-  if (!canMoveTo(nextRow, nextCol)) {
+  if (!canMoveTo(maze, nextRow, nextCol)) {
     return;
   }
 
@@ -125,96 +131,14 @@ function resetGame() {
   renderMaze();
 }
 
-function canMoveTo(row: number, col: number): boolean {
-  if (row < 0 || row >= maze.length) {
-    return false;
-  }
-
-  if (col < 0 || col >= maze[row].length) {
-    return false;
-  }
-
-  return maze[row][col] !== '#';
-}
-
-function findShortestPath(
-  start: { row: number; col: number },
-  end: { row: number; col: number }
-): { row: number; col: number }[] {
-  const queue: { row: number; col: number; path: { row: number; col: number }[] }[] = [
-    {
-      row: start.row,
-      col: start.col,
-      path: [start],
-    },
-  ];
-
-  const visited = new Set<string>();
-  visited.add(`${start.row},${start.col}`);
-
-  const directions = [
-    { row: -1, col: 0 },
-    { row: 1, col: 0 },
-    { row: 0, col: -1 },
-    { row: 0, col: 1 },
-  ];
-
-  while (queue.length > 0) {
-    const current = queue.shift();
-
-    if (!current) {
-      break;
-    }
-
-    if (current.row === end.row && current.col === end.col) {
-      return current.path;
-    }
-
-    for (const direction of directions) {
-      const nextRow = current.row + direction.row;
-      const nextCol = current.col + direction.col;
-      const key = `${nextRow},${nextCol}`;
-
-      if (visited.has(key)) {
-        continue;
-      }
-
-      if (!canMoveTo(nextRow, nextCol)) {
-        continue;
-      }
-
-      visited.add(key);
-
-      queue.push({
-        row: nextRow,
-        col: nextCol,
-        path: [...current.path, { row: nextRow, col: nextCol }],
-      });
-    }
-  }
-
-  return [];
-}
-
 function showShortestPath() {
-  const exitPosition = findExitPosition();
+  const exitPosition = findExitPosition(maze);
 
-  solutionPath = findShortestPath(playerPosition, exitPosition);
+  solutionPath = findShortestPath(maze, playerPosition, exitPosition);
 
   renderMaze();
 }
 
-function findExitPosition(): { row: number; col: number } {
-  for (let row = 0; row < maze.length; row++) {
-    for (let col = 0; col < maze[row].length; col++) {
-      if (maze[row][col] === 'E') {
-        return { row, col };
-      }
-    }
-  }
-
-  throw new Error('Exit not found');
-}
 
 document.addEventListener('keydown', event => {
   if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') {
