@@ -83,7 +83,7 @@ function renderMaze() {
                     playerPosition.col === colIndex;
 
                   if (isPlayer) {
-  return `<div class="cell player">🙂</div>`;
+  return `<div class="cell player">🐭</div>`;
 }
 
 const isPath = solutionPath.some(
@@ -143,7 +143,7 @@ function getCellClass(cell: string): string {
 }
 
 function getCellText(cell: string): string {
-  if (cell === 'E') return '🚪';
+  if (cell === 'E') return '🧀';
   return '';
 }
 
