@@ -47,3 +47,8 @@ body {
 .exit {
   background: #ff9800;
 }
+
+.win-message {
+  color: #90ee90;
+  margin-top: 10px;
+}
